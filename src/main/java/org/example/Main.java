@@ -10,6 +10,6 @@ public class Main {
 //        db.insertRow(conn, "employees", "Vannthy", "Cambodia");
         db.update(conn, "employees", 1, "Jisoo", "Korea");
         db.readData(conn, "employees");
-
+        System.out.println();
     }
 }
