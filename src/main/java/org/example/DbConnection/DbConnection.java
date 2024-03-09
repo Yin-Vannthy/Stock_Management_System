@@ -6,11 +6,10 @@ import java.sql.*;
 public class DbConnection {
 
     // Database connection configuration
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/kshrd_db";
+    private static final String DB_URL = "jdbc:postgresql://localhost:5432/";
     private static final String DB_USER = "postgres";
     private static final String DB_PASSWORD = "admin";
-    // Extract the database name from the DB_URL
-    private static final String databaseName = "kshrd_db";
+    private static final String DATABASE_NAME = "kshrd_db";
 
     // Connection method
     public Connection connection() {
@@ -18,7 +17,7 @@ public class DbConnection {
         try {
             Class.forName("org.postgresql.Driver");
 
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            connection = DriverManager.getConnection(DB_URL + DATABASE_NAME, DB_USER, DB_PASSWORD);
 
             if (connection == null) {
                 System.out.println("Connection failed");
@@ -27,7 +26,7 @@ public class DbConnection {
             // Check if the required tables exist, create them if not
             try (Statement statement = connection.createStatement()) {
                 statement.execute("CREATE TABLE IF NOT EXISTS products (\n" +
-                        "  id SERIAL,\n" +
+                        "  id SERIAL PRIMARY KEY,\n" +
                         "  name VARCHAR(150) NOT NULL,\n" +
                         "  unit_price DECIMAL(10,2) NOT NULL,\n" +
                         "  stock_quantity INT NOT NULL,\n" +
@@ -35,7 +34,7 @@ public class DbConnection {
                         ");");
 
                 statement.execute("CREATE TABLE IF NOT EXISTS unsaved_insertion (\n" +
-                        "  id INT,\n" +
+                        "  id SERIAL PRIMARY KEY,\n" +
                         "  name VARCHAR(150) NOT NULL,\n" +
                         "  unit_price DECIMAL(10,2) NOT NULL,\n" +
                         "  stock_quantity INT NOT NULL,\n" +
@@ -43,7 +42,7 @@ public class DbConnection {
                         ");");
 
                 statement.execute("CREATE TABLE IF NOT EXISTS unsaved_update (\n" +
-                        "  id INT,\n" +
+                        "  id SERIAL PRIMARY KEY,\n" +
                         "  name VARCHAR(150) NOT NULL,\n" +
                         "  unit_price DECIMAL(10,2) NOT NULL,\n" +
                         "  stock_quantity INT NOT NULL,\n" +
@@ -68,8 +67,14 @@ public class DbConnection {
                             "('heniken', 5.99, 60);");
                 }
 
-                // Insert values into set_row table
-                statement.executeUpdate("INSERT INTO set_row VALUES (1, 3);");
+                // Check if set_row table is empty
+                rs = statement.executeQuery("SELECT COUNT(*) FROM set_row");
+                rs.next();
+                count = rs.getInt(1);
+                if (count == 0) {
+                    // Insert values into set_row table if it's empty
+                    statement.executeUpdate("INSERT INTO set_row VALUES (1, 3);");
+                }
             }
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
@@ -117,7 +122,7 @@ public class DbConnection {
 
             // Use ProcessBuilder to run psql command with password option
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    psqlPath, "-U", DB_USER, "-d", "template1", "-c", "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '" + databaseName + "' AND pid <> pg_backend_pid()");
+                    psqlPath, "-U", DB_USER, "-d", "template1", "-c", "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '" + DATABASE_NAME + "' AND pid <> pg_backend_pid()");
 
             // Set the password as an environment variable
             processBuilder.environment().put("PGPASSWORD", DB_PASSWORD);
@@ -127,7 +132,7 @@ public class DbConnection {
             process.waitFor();
 
             processBuilder = new ProcessBuilder(
-                    psqlPath, "-U", DB_USER, "-d", "template1", "-c", "DROP DATABASE IF EXISTS " + databaseName);
+                    psqlPath, "-U", DB_USER, "-d", "template1", "-c", "DROP DATABASE IF EXISTS " + DATABASE_NAME);
 
             // Set the password as an environment variable
             processBuilder.environment().put("PGPASSWORD", DB_PASSWORD);
@@ -137,7 +142,7 @@ public class DbConnection {
             process.waitFor();
 
             processBuilder = new ProcessBuilder(
-                    psqlPath, "-U", DB_USER, "-d", "template1", "-c", "CREATE DATABASE " + databaseName);
+                    psqlPath, "-U", DB_USER, "-d", "template1", "-c", "CREATE DATABASE " + DATABASE_NAME);
 
             // Set the password as an environment variable
             processBuilder.environment().put("PGPASSWORD", DB_PASSWORD);
@@ -147,7 +152,7 @@ public class DbConnection {
             process.waitFor();
 
             processBuilder = new ProcessBuilder(
-                    psqlPath, "-U", DB_USER, "-d", databaseName, "-f", backupFilePath);
+                    psqlPath, "-U", DB_USER, "-d", DATABASE_NAME, "-f", backupFilePath);
 
             // Set the password as an environment variable
             processBuilder.environment().put("PGPASSWORD", DB_PASSWORD);

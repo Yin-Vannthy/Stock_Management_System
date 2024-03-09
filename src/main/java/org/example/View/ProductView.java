@@ -6,7 +6,6 @@ import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
-import java.util.Collections;
 import java.util.*;
 
 public class ProductView {
@@ -69,7 +68,7 @@ public class ProductView {
             user_input = in.nextLine();
             // If input is invalid
             if (!user_input.matches("[a-zA-z]+")) {
-                printColoredMessage("Invalid option! Please choose a valid option\n\n", ANSI_RED);
+                printColoredMessage("Invalid option! Please choose a valid option\n", ANSI_RED);
                 continue;
             }
             return user_input;
@@ -90,10 +89,10 @@ public class ProductView {
     public static void displayAllOptions() {
         // Calculate a specific total product, total page, and start from page 1
         int pageNumber = 1;
-        int totalProducts = productController.getTotalNumberOfProducts();
-        int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
-
         do {
+            int totalProducts = productController.getTotalNumberOfProducts();
+            int totalPages = (int) Math.ceil((double) totalProducts / pageSize);
+
             // Get all records from get product method and store it in a list
             List<ProductModel> productList = productController.getProductsByPage(pageNumber, pageSize);
 
@@ -161,14 +160,15 @@ public class ProductView {
                 case "E" -> System.exit(0);
                 default -> printColoredMessage("Invalid option! Please choose a valid option.\n\n", ANSI_RED);
             }
-
         } while (true);
+
+
     }
 
     // Display Product By ID Method
     private static void displayProductByID() {
         do {
-            int id = Integer.parseInt(validateInput("\n=> Enter an ID to Search or 0 to go back : ", "ID Allow Only Integer Number And Positive Number","\\d+"));
+            int id = Integer.parseInt(validateInput("\n=> Enter an ID to Search or 0 to go back : ", "ID Allow Only Integer Number And Positive Number\n","\\d+"));
             if (id == 0){
                 return;
             }
@@ -191,7 +191,7 @@ public class ProductView {
                 printColoredMessage("No product found with the given ID : " + id + "\n\n" , ANSI_RED);
             }
 
-            int press = Integer.parseInt(validateInput("Press 1 to search again and 0 to cancel : ", "Invalid input! Please input only 1 or 0", "[01]"));
+            int press = Integer.parseInt(validateInput("Press 1 to search again and 0 to cancel : ", "Invalid input! Please input only 1 or 0\n", "[01]"));
             if (press == 0){
                 return;
             }
@@ -201,12 +201,12 @@ public class ProductView {
     private static void searchProductByName() {
         do {
             // Ask user to search product
-            String name = validateInput("\n=> Enter an ID to Search or B to go back : ", "ID Allow Only Integer Number And Positive Number","[a-zA-Z ]+");
+            String name = validateInput("\n=> Enter a name to search or Back to go back : ", "Name allow only text\n","[a-zA-Z ]+");
             // If user press b then go back
-            if (name.equalsIgnoreCase("B")){
+            if (name.equalsIgnoreCase("BACK")){
                 return;
             }
-            // Call the get prodcut by name method and store all data in a list
+            // Call the get product by name method and store all data in a list
             List<ProductModel> productList = productController.getProductsByName(name);
 
             if (!productList.isEmpty()){
@@ -228,7 +228,7 @@ public class ProductView {
                 printColoredMessage("No products found with the given name : " + name + "\n\n", ANSI_RED);
             }
             // Ask user to search again or go back
-            int press = Integer.parseInt(validateInput("\nPress 1 to search again and 0 to cancel : ", "Invalid input! Please input only 1 or 0", "[01]"));
+            int press = Integer.parseInt(validateInput("Press 1 to search again and 0 to cancel : ", "Invalid input! Please input only 1 or 0\n\n", "[01]"));
             // If user press 0 then go back
             if (press == 0){
                 return;
@@ -241,7 +241,7 @@ public class ProductView {
         String name = validateInput("\n=> Enter product name : ", "Invalid input! Name allow only text.\n", "[a-zA-Z ]+");
         double unitPrice;
         do {
-            unitPrice = Double.parseDouble(validateInput("=> Enter unit price : ", "Invalid input! Price allow only number and positive number.\n", "\\d+(\\.\\d+)?"));
+            unitPrice = Double.parseDouble(validateInput("=> Enter unit price : ", "Invalid input! Price allow only number and positive number.\n\n", "\\d+(\\.\\d+)?"));
             if (unitPrice == 0){
                 printColoredMessage("Price must be greater than zero\n\n", ANSI_RED);
             }
@@ -249,17 +249,14 @@ public class ProductView {
 
         int stockQty;
         do {
-            stockQty = Integer.parseInt(validateInput("=> Enter stock quantity : ", "Invalid input! Quantity allow only integer number and positive number.\n", "\\d+"));
+            stockQty = Integer.parseInt(validateInput("=> Enter stock quantity : ", "Invalid input! Quantity allow only integer number and positive number.\n\n", "\\d+"));
             if (stockQty == 0){
                 printColoredMessage("Stock Quantity must be greater than zero\n\n", ANSI_RED);
             }
         }while (stockQty == 0);
 
-        // Retrieve the next available ID from products table
-        int nextId = productController.getNextAvailableId();
-
         // Create a ProductModel object with the retrieved ID and user-provided data
-        ProductModel product = new ProductModel(nextId, name, unitPrice, stockQty, null);
+        ProductModel product = new ProductModel(0, name, unitPrice, stockQty, null);
 
         // Add the product to unsaved insertions table
         productController.insertProduct(product);
@@ -281,10 +278,10 @@ public class ProductView {
         // Check if the product exists
         if (existingProduct != null) {
             // Get the updated information from the user
-            String name = validateInput("=> Enter updated product name: ", "Invalid input! Name allow only text.\n", "[a-zA-Z ]+");
+            String name = validateInput("\n=> Enter updated product name: ", "Invalid input! Name allow only text.\n", "[a-zA-Z ]+");
             double unitPrice;
             do {
-                unitPrice = Double.parseDouble(validateInput("=> Enter updated unit price: ", "Invalid input! Price allow only number and positive number.\n", "\\d+(\\.\\d+)?"));
+                unitPrice = Double.parseDouble(validateInput("=> Enter updated unit price: ", "Invalid input! Price allow only number and positive number.\n\n", "\\d+(\\.\\d+)?"));
                 if (unitPrice == 0){
                     printColoredMessage("Price must be greater than zero\n\n", ANSI_RED);
                 }
@@ -292,7 +289,7 @@ public class ProductView {
 
             int stockQty;
             do {
-                stockQty = Integer.parseInt(validateInput("=> Enter updated stock quantity: ", "Invalid input! Quantity allow only integer number and positive number.\n", "\\d+"));
+                stockQty = Integer.parseInt(validateInput("=> Enter updated stock quantity: ", "Invalid input! Quantity allow only integer number and positive number.\n\n", "\\d+"));
                 if (stockQty == 0){
                     printColoredMessage("Stock Quantity must be greater than zero\n\n", ANSI_RED);
                 }
@@ -349,55 +346,53 @@ public class ProductView {
             return;
         }
         // Ask user to save specific unsaved data
-        do {
-            String choice = validateInput("\nChoose an option (Ui for save insertions, Uu for save updates, B for go back): ","Invalid input! Please choose Ui or Uu to save unsaved data.\n\n", "[a-zA-Z]+");
+        String choice = validateInput("\nChoose an option (Ui for save insertions, Uu for save updates, B for go back): ","Invalid input! Please choose Ui or Uu to save unsaved data.\n", "[a-zA-Z]+");
 
-            if (choice.equalsIgnoreCase("B")){
-                return;
-            }
-            // Switch user option
-            switch (choice.toUpperCase()) {
-                case "UI" -> {
-                    // Display unsaved update data
-                    displayUnsavedInsertions();
-                    // If there are no unsaved insertions data exit
-                    if (unsavedInsertions.isEmpty()){
-                        printColoredMessage("\nPress any key to continue...", ANSI_GREEN);
-                        in.nextLine();
-                        break;
-                    }
-                    // Ask user to confirm
-                    String confirm = validateInput("Do you want to save unsaved insertions? (Y/N) : ", "Invalid input! Please enter 'Y' or 'N'.\n", "[yYnN]");
-                    // If user press y then save it to table products
-                    if (confirm.equalsIgnoreCase("Y")) {
-                        productController.saveUnsavedInsertion();
-                        printColoredMessage("Unsaved insertions data saved successfully!\n\n", ANSI_GREEN);
-                    } else {
-                        printColoredMessage("Operation cancelled.\n\n", ANSI_RED);
-                    }
+        if (choice.equalsIgnoreCase("B")){
+            return;
+        }
+        // Switch user option
+        switch (choice.toUpperCase()) {
+            case "UI" -> {
+                // Display unsaved update data
+                displayUnsavedInsertions();
+                // If there are no unsaved insertions data exit
+                if (unsavedInsertions.isEmpty()){
+                    printColoredMessage("\nPress any key to continue...", ANSI_GREEN);
+                    in.nextLine();
+                    break;
                 }
-                case "UU" -> {
-                    // Display unsaved update data
-                    displayUnsavedUpdates();
-                    // If there are no unsaved update data exit
-                    if (unsavedUpdates.isEmpty()){
-                        printColoredMessage("\nPress any key to continue...", ANSI_GREEN);
-                        in.nextLine();
-                        break;
-                    }
-                    // Ask user to confirm
-                    String confirm = validateInput("Do you want to save unsaved updates? (Y/N) : ", "Invalid input! Please enter 'Y' or 'N'.\n", "[yYnN]");
-                    // If user press y then save it to table products
-                    if (confirm.equalsIgnoreCase("Y")) {
-                        productController.saveUnsavedUpdate();
-                        printColoredMessage("Unsaved updates data saved successfully!\n\n", ANSI_GREEN);
-                    } else {
-                        printColoredMessage("Operation cancelled.\n\n", ANSI_RED);
-                    }
+                // Ask user to confirm
+                String confirm = validateInput("\nDo you want to save unsaved insertions? (Y/N) : ", "Invalid input! Please enter 'Y' or 'N'.\n", "[yYnN]");
+                // If user press y then save it to table products
+                if (confirm.equalsIgnoreCase("Y")) {
+                    productController.saveUnsavedInsertion();
+                    printColoredMessage("Unsaved insertions data saved successfully!\n\n", ANSI_GREEN);
+                } else {
+                    printColoredMessage("Operation cancelled.\n", ANSI_RED);
                 }
-                default -> printColoredMessage("Invalid choice. Please enter either 'Ui' or 'Uu' or 'B'.\n\n", ANSI_RED);
             }
-        }while (true);
+            case "UU" -> {
+                // Display unsaved update data
+                displayUnsavedUpdates();
+                // If there are no unsaved update data exit
+                if (unsavedUpdates.isEmpty()){
+                    printColoredMessage("\nPress any key to continue...", ANSI_GREEN);
+                    in.nextLine();
+                    break;
+                }
+                // Ask user to confirm
+                String confirm = validateInput("\nDo you want to save unsaved updates? (Y/N) : ", "Invalid input! Please enter 'Y' or 'N'.\n", "[yYnN]");
+                // If user press y then save it to table products
+                if (confirm.equalsIgnoreCase("Y")) {
+                    productController.saveUnsavedUpdate();
+                    printColoredMessage("Unsaved updates data saved successfully!\n\n", ANSI_GREEN);
+                } else {
+                    printColoredMessage("Operation cancelled.\n", ANSI_RED);
+                }
+            }
+            default -> printColoredMessage("Invalid choice. Please enter either 'Ui' or 'Uu' or 'B'.\n", ANSI_RED);
+        }
     }
     // Display a list of unsaved products option
     private static void displayUnsavedDataOption() {
@@ -530,10 +525,10 @@ public class ProductView {
            if (success) {
                printColoredMessage("Product with ID " + id + " deleted successfully!\n\n", ANSI_GREEN);
            } else {
-               printColoredMessage("Failed to delete product with ID " + id + ".\n\n", ANSI_RED);
+               printColoredMessage("Failed to delete product with ID " + id + ". No product found.\n\n", ANSI_RED);
            }
            // Ask user to delete again or exit
-           int press = Integer.parseInt(validateInput("Press 1 to delete again and 0 to cancel", "Invalid input! Please input only 1 or 0", "[01]"));
+           int press = Integer.parseInt(validateInput("Press 1 to delete again and 0 to cancel : ", "Invalid input! Please input only 1 or 0\n\n", "[01]"));
            // If user press 0 exit
            if (press == 0){
                return;

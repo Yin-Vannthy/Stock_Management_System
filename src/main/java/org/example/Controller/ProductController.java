@@ -105,17 +105,16 @@ public class ProductController {
 
         return productList;
     }
-    // Method to get the next available ID from the data source
-    public int getNextAvailableId() {
+    public int getNextAvailableIdOfUnsavedInsertion() {
         int nextId = 0;
         try (Connection connection = dbConnection.connection()) {
             // Query used to get the last ID from actual table that it will be use in insert data to a temporary table
-            String query = "SELECT MAX(id) FROM products";
+            String query = "SELECT MAX(id) FROM unsaved_insertion";
             try (PreparedStatement statement = connection.prepareStatement(query)) {
                 try (ResultSet resultSet = statement.executeQuery()) {
                     if (resultSet.next()) {
                         // Plus the last ID with 1
-                        nextId = resultSet.getInt(1) + 1;
+                        nextId = resultSet.getInt(1);
                     }
                 }
             }
@@ -128,12 +127,11 @@ public class ProductController {
     public void insertProduct(ProductModel product) {
         try (Connection connection = dbConnection.connection()) {
             // // Query used to insert data after update it to a temporary table
-            String query = "INSERT INTO unsaved_insertion(id, name, unit_price, stock_quantity) VALUES (?, ?, ?, ?)";
+            String query = "INSERT INTO unsaved_insertion(name, unit_price, stock_quantity) VALUES ( ?, ?, ?)";
             try (PreparedStatement statement = connection.prepareStatement(query)) {
-                statement.setInt(1, product.getId()); // Assuming the ID is set in the product model
-                statement.setString(2, product.getName());
-                statement.setDouble(3, product.getUnitPrice());
-                statement.setInt(4, product.getStockQty());
+                statement.setString(1, product.getName());
+                statement.setDouble(2, product.getUnitPrice());
+                statement.setInt(3, product.getStockQty());
                 // Execute query
                 statement.executeUpdate();
             }
@@ -317,9 +315,9 @@ public class ProductController {
         try (Connection conn = dbConnection.connection()) {
             // Query count all record in products table
             String sql = "SELECT COUNT(*) FROM products";
-            try (Statement statement = conn.createStatement();
-                 // Store it in ResultSet
-                 ResultSet resultSet = statement.executeQuery(sql)) {
+            try (PreparedStatement statement = conn.prepareStatement(sql);
+                 // Execute the query
+                 ResultSet resultSet = statement.executeQuery()) {
                 // If there are any data store it in a variable
                 if (resultSet.next()) {
                     totalNumberOfProducts = resultSet.getInt(1);
@@ -337,7 +335,7 @@ public class ProductController {
 
         try (Connection connection = dbConnection.connection()) {
             // Get value from specific column
-            String query = "SELECT row FROM set_row";
+            String query = "SELECT row FROM set_row LIMIT 1";
             // prepare statement
             try (PreparedStatement statement = connection.prepareStatement(query);
                  // Store data in ResultSet
